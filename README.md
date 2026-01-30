@@ -1,18 +1,21 @@
-# MCP Apps Playground (Daily Discovery MVP)
+# SpendSnap (Daily Discovery MVP)
 
-A tiny local sandbox to demo the **MCP Apps** pattern:
+Upload/paste a receipt → instantly get a clean spending dashboard.
 
-- a **host** page (parent) sends tool output/data
-- a sandboxed **UI** (iframe) renders it
-- they talk via `postMessage` (stand-in for an MCP App bridge)
-
-This was inspired by the recently-stabilized MCP Apps Extension spec (SEP-1865) in `@modelcontextprotocol/ext-apps`.
+This repo started as an “MCP Apps playground”, but we’re tailoring it for a **regular-person** audience and a video-friendly “holy shit” moment.
 
 ## What it does
 
-- Lets you paste/edit a JSON payload representing a tool call/result
-- Sends it to a sandboxed iframe
-- The iframe renders the payload and can emit UI events back to the host
+- Lets you **upload a receipt image** (simulated OCR for now) or paste receipt text
+- Click **Analyze**
+- Generates a dashboard with:
+  - Merchant + date
+  - Total + tax
+  - Category breakdown (pie)
+  - Line items table
+  - Quick insights
+
+**Demo note:** image upload currently uses **simulated OCR** (drops in a sample receipt text). The dashboard pipeline is the focus; we can swap in real OCR later.
 
 ## Run it
 
@@ -21,30 +24,25 @@ npm install
 npm run dev
 ```
 
-Then open:
-
+Open:
 - http://localhost:3000
 
-## Usage
+If you’re on the same LAN:
+- http://<your-mac-mini-ip>:3000
 
-1. Edit the JSON on the left (tool name, input, output, etc.)
-2. Click **Send to UI**
-3. Watch the iframe render the data + the host log update
+## How to try it
+
+1) Click **Use sample receipt** → then **Analyze**
+2) Or upload an image (mobile supports “camera” via the file picker) → then **Analyze**
 
 ## Tech
 
 - Node.js + Express
 - Plain HTML/CSS/JS (intentionally minimal)
 
-## Limitations
+## What’s next (for the real product feel)
 
-- This is **not** a full MCP Apps host implementation
-- It uses `postMessage` directly (no schema validation, no bridge, no security hardening)
-- Sandbox is strict (`sandbox="allow-scripts"`) to keep the demo safe
-
-## What’s next
-
-- Add a small bridge layer that mirrors the MCP Apps host/app-bridge API shape
-- Add schema validation + message origin checks
-- Add a “tool call simulator” panel (UI event -> mocked tool call -> updated tool_data)
-- Export/shareable demo payloads (no secrets)
+- Real OCR (local or API) → receipt text extraction
+- Better receipt parsing (line items, totals, dates, store detection)
+- Editable categories + instant re-totals (super satisfying in video)
+- “This month vs last month” trend view (even with mocked history)

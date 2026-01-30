@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1200" viewBox="0 0 800 1200">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.14"/>
+    </filter>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#fbfaf7"/>
+    </linearGradient>
+    <linearGradient id="tear" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f3f1ed"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <style>
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+      .h1 { font-size: 40px; font-weight: 800; letter-spacing: 1px; }
+      .sub { font-size: 22px; opacity: 0.85; }
+      .txt { font-size: 22px; }
+      .muted { opacity: 0.7; }
+      .rule { opacity: 0.25; }
+    </style>
+  </defs>
+
+  <!-- Paper -->
+  <rect x="90" y="70" width="620" height="1040" rx="22" fill="url(#paper)" filter="url(#shadow)"/>
+
+  <!-- Header dot -->
+  <circle cx="150" cy="150" r="18" fill="#111"/>
+
+  <!-- Header text -->
+  <text x="190" y="160" class="mono h1" fill="#111">WHOLE FOODS</text>
+  <text x="190" y="195" class="mono sub" fill="#111">MARKET</text>
+
+  <!-- Address -->
+  <text x="140" y="260" class="mono txt" fill="#111">1695 2nd Ave</text>
+  <text x="140" y="295" class="mono txt" fill="#111">New York, NY</text>
+
+  <!-- Date -->
+  <text x="140" y="360" class="mono txt" fill="#111"><tspan class="muted">Date:</tspan> 01/30/2026  10:41 AM</text>
+
+  <!-- Divider -->
+  <line x1="140" y1="395" x2="660" y2="395" stroke="#111" stroke-width="2" class="rule"/>
+
+  <!-- Items (two columns) -->
+  <text x="140" y="450" class="mono txt" fill="#111">Bananas</text>
+  <text x="660" y="450" class="mono txt" fill="#111" text-anchor="end">1.29</text>
+
+  <text x="140" y="495" class="mono txt" fill="#111">Greek Yogurt</text>
+  <text x="660" y="495" class="mono txt" fill="#111" text-anchor="end">5.99</text>
+
+  <text x="140" y="540" class="mono txt" fill="#111">Chicken Thighs</text>
+  <text x="660" y="540" class="mono txt" fill="#111" text-anchor="end">12.99</text>
+
+  <text x="140" y="585" class="mono txt" fill="#111">Avocados (2)</text>
+  <text x="660" y="585" class="mono txt" fill="#111" text-anchor="end">3.58</text>
+
+  <text x="140" y="630" class="mono txt" fill="#111">Sparkling Water</text>
+  <text x="660" y="630" class="mono txt" fill="#111" text-anchor="end">6.49</text>
+
+  <text x="140" y="675" class="mono txt" fill="#111">Ice Cream Pint</text>
+  <text x="660" y="675" class="mono txt" fill="#111" text-anchor="end">8.99</text>
+
+  <!-- Divider -->
+  <line x1="140" y1="715" x2="660" y2="715" stroke="#111" stroke-width="2" class="rule"/>
+
+  <!-- Totals -->
+  <text x="140" y="770" class="mono txt" fill="#111">Subtotal</text>
+  <text x="660" y="770" class="mono txt" fill="#111" text-anchor="end">39.33</text>
+
+  <text x="140" y="815" class="mono txt" fill="#111">Tax</text>
+  <text x="660" y="815" class="mono txt" fill="#111" text-anchor="end">3.12</text>
+
+  <line x1="140" y1="845" x2="660" y2="845" stroke="#111" stroke-width="2" class="rule"/>
+
+  <text x="140" y="900" class="mono h1" fill="#111">TOTAL</text>
+  <text x="660" y="900" class="mono h1" fill="#111" text-anchor="end">42.45</text>
+
+  <!-- Payment -->
+  <text x="140" y="980" class="mono txt" fill="#111">VISA **** 4242</text>
+
+  <!-- Thanks -->
+  <text x="140" y="1040" class="mono txt" fill="#111">Thank you!</text>
+
+  <!-- Perforated edge -->
+  <rect x="90" y="1088" width="620" height="22" fill="url(#tear)"/>
+  <g fill="#f3f1ed">
+    <circle cx="110" cy="1099" r="8"/>
+    <circle cx="150" cy="1099" r="8"/>
+    <circle cx="190" cy="1099" r="8"/>
+    <circle cx="230" cy="1099" r="8"/>
+    <circle cx="270" cy="1099" r="8"/>
+    <circle cx="310" cy="1099" r="8"/>
+    <circle cx="350" cy="1099" r="8"/>
+    <circle cx="390" cy="1099" r="8"/>
+    <circle cx="430" cy="1099" r="8"/>
+    <circle cx="470" cy="1099" r="8"/>
+    <circle cx="510" cy="1099" r="8"/>
+    <circle cx="550" cy="1099" r="8"/>
+    <circle cx="590" cy="1099" r="8"/>
+    <circle cx="630" cy="1099" r="8"/>
+    <circle cx="670" cy="1099" r="8"/>
+    <circle cx="710" cy="1099" r="8"/>
+  </g>
+</svg>

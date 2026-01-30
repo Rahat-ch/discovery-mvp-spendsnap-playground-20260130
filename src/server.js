@@ -15,11 +15,15 @@ app.use("/static", express.static(path.join(__dirname, "..", "static"), {
 }));
 
 app.get("/", (_req, res) => {
+  // Avoid caching HTML during rapid demo iteration
+  res.set("Cache-Control", "no-store");
   res.type("html").sendFile(path.join(__dirname, "..", "static", "index.html"));
 });
 
 app.get("/app", (_req, res) => {
   // This is the iframe content (a stand-in for an MCP App UI resource).
+  // Avoid caching HTML during rapid demo iteration
+  res.set("Cache-Control", "no-store");
   res.type("html").sendFile(path.join(__dirname, "..", "static", "app.html"));
 });
 

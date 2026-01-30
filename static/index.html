@@ -3,104 +3,708 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MCP Apps Playground</title>
+    <title>SpendSnap — Stop guessing where your money went</title>
     <style>
-      :root { color-scheme: light dark; }
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; }
-      header { padding: 16px 18px; border-bottom: 1px solid rgba(127,127,127,0.25); }
-      header h1 { margin: 0 0 6px; font-size: 18px; }
-      header p { margin: 0; opacity: 0.8; font-size: 13px; }
-      main { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; height: calc(100vh - 82px); box-sizing: border-box; }
-      .panel { border: 1px solid rgba(127,127,127,0.25); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
-      .panel h2 { margin: 0; padding: 10px 12px; font-size: 13px; border-bottom: 1px solid rgba(127,127,127,0.25); opacity: 0.9; }
-      textarea { flex: 1; width: 100%; border: 0; outline: none; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; resize: none; }
-      .controls { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(127,127,127,0.25); align-items: center; }
-      button { padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(127,127,127,0.35); background: transparent; cursor: pointer; }
-      button:hover { border-color: rgba(127,127,127,0.7); }
-      .small { font-size: 12px; opacity: 0.8; }
-      iframe { flex: 1; width: 100%; border: 0; background: rgba(127,127,127,0.05); }
-      pre { margin: 0; padding: 10px 12px; font-size: 12px; overflow: auto; max-height: 160px; border-top: 1px solid rgba(127,127,127,0.25); }
-      @media (max-width: 900px) { main { grid-template-columns: 1fr; height: auto; } }
+      *, *::before, *::after { box-sizing: border-box; }
+
+      :root {
+        --bg: #F7F3ED;
+        --text: #1A1A1A;
+        --text-muted: #5C5C5C;
+        --olive: #3D4A3A;
+        --olive-hover: #2D382B;
+        --card-bg: #FFFDF9;
+        --border: rgba(60, 74, 58, 0.12);
+        --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+        --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: var(--sans);
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      /* Nav */
+      nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 48px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .wordmark {
+        font-family: var(--serif);
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+
+      .nav-link {
+        font-size: 15px;
+        color: var(--text);
+        text-decoration: none;
+        opacity: 0.85;
+      }
+      .nav-link:hover { opacity: 1; }
+
+      .btn {
+        font-family: var(--sans);
+        font-size: 15px;
+        font-weight: 500;
+        padding: 14px 28px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary {
+        background: var(--olive);
+        color: #fff;
+      }
+      .btn-primary:hover { background: var(--olive-hover); }
+
+      .btn-outline {
+        background: transparent;
+        border: 1.5px solid var(--olive);
+        color: var(--olive);
+      }
+      .btn-outline:hover { background: rgba(61, 74, 58, 0.08); }
+
+      /* Hero */
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 60px 48px 80px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 16px;
+      }
+
+      .hero h1 {
+        font-family: var(--serif);
+        font-size: clamp(42px, 5.5vw, 72px);
+        font-weight: 400;
+        line-height: 1.05;
+        margin: 0 0 24px;
+        letter-spacing: -1px;
+      }
+
+      .hero-sub {
+        font-size: 18px;
+        color: var(--text-muted);
+        max-width: 480px;
+        margin-bottom: 32px;
+        line-height: 1.6;
+      }
+
+      .hero-visual {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+      }
+
+      .receipt-card {
+        width: 280px;
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 32px 28px;
+        box-shadow:
+          0 4px 24px rgba(0,0,0,0.06),
+          0 0 80px rgba(255, 220, 180, 0.4),
+          0 0 120px rgba(255, 200, 220, 0.25);
+        transform: rotate(3deg);
+        position: relative;
+      }
+
+      .receipt-card::before {
+        content: '';
+        position: absolute;
+        inset: -20px;
+        background: linear-gradient(135deg, rgba(255,248,220,0.6), rgba(255,220,230,0.4), rgba(220,255,240,0.3));
+        border-radius: 24px;
+        z-index: -1;
+        filter: blur(20px);
+      }
+
+      .receipt-dot {
+        width: 24px;
+        height: 24px;
+        background: var(--text);
+        border-radius: 50%;
+        margin-bottom: 16px;
+      }
+
+      .receipt-title {
+        font-family: var(--serif);
+        font-size: 18px;
+        margin-bottom: 20px;
+      }
+
+      .receipt-line {
+        height: 10px;
+        background: rgba(0,0,0,0.08);
+        border-radius: 4px;
+        margin-bottom: 12px;
+      }
+      .receipt-line.short { width: 60%; }
+      .receipt-line.medium { width: 80%; }
+      .receipt-line.total {
+        height: 14px;
+        background: var(--text);
+        width: 50%;
+        margin-top: 24px;
+      }
+
+      .receipt-edge {
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        right: 0;
+        height: 16px;
+        background: repeating-linear-gradient(
+          90deg,
+          var(--card-bg) 0px,
+          var(--card-bg) 8px,
+          transparent 8px,
+          transparent 16px
+        );
+      }
+
+      .chevron {
+        position: absolute;
+        top: 20px;
+        right: -40px;
+        width: 32px;
+        height: 32px;
+        border: 3px solid #8BC34A;
+        border-left: none;
+        border-bottom: none;
+        transform: rotate(45deg);
+      }
+
+      /* Scanner Section */
+      .scanner-section {
+        background: var(--card-bg);
+        padding: 80px 48px;
+      }
+
+      .scanner-wrap {
+        max-width: 800px;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .scanner-wrap h2 {
+        font-family: var(--serif);
+        font-size: 36px;
+        font-weight: 400;
+        margin: 0 0 12px;
+      }
+
+      .scanner-wrap .sub {
+        color: var(--text-muted);
+        margin-bottom: 40px;
+      }
+
+      .scan-box {
+        background: var(--bg);
+        border: 2px dashed var(--border);
+        border-radius: 20px;
+        padding: 48px 32px;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.3s;
+      }
+      .scan-box.active { border-color: var(--olive); border-style: solid; }
+
+      .scan-preview {
+        display: none;
+        width: min(320px, 100%);
+        max-height: 300px;
+        object-fit: contain;
+        border-radius: 12px;
+        margin: 0 auto 12px;
+      }
+      .scan-preview.visible { display: block; }
+
+      .scan-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .scan-actions .btn { min-width: 220px; }
+
+      .file-input { display: none; }
+
+      .upload-link {
+        font-size: 14px;
+        color: var(--text-muted);
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      .upload-link:hover { color: var(--text); }
+
+      .scan-status {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 40px 0;
+      }
+      .scan-status.visible { display: flex; }
+
+      .scan-status-text {
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      /* Scanline Animation */
+      .scanline {
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--olive), transparent);
+        box-shadow: 0 0 20px var(--olive);
+        opacity: 0;
+        top: 20%;
+        pointer-events: none;
+      }
+
+      .scanning .scanline {
+        opacity: 1;
+        animation: scanMove 1.5s ease-in-out infinite;
+      }
+
+      @keyframes scanMove {
+        0% { top: 15%; }
+        50% { top: 75%; }
+        100% { top: 15%; }
+      }
+
+      /* Flash Animation */
+      .flash-overlay {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .flash-overlay.flash {
+        animation: flashAnim 0.4s ease-out;
+      }
+
+      @keyframes flashAnim {
+        0% { opacity: 0.9; }
+        100% { opacity: 0; }
+      }
+
+      /* Loading Spinner */
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border);
+        border-top-color: var(--olive);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Advanced Toggle */
+      .advanced-toggle {
+        margin-top: 32px;
+        text-align: center;
+      }
+
+      .advanced-toggle summary {
+        font-size: 13px;
+        color: var(--text-muted);
+        cursor: pointer;
+        list-style: none;
+      }
+      .advanced-toggle summary::-webkit-details-marker { display: none; }
+      .advanced-toggle summary:hover { color: var(--text); }
+
+      .advanced-content {
+        margin-top: 16px;
+      }
+
+      .receipt-textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        resize: vertical;
+        background: var(--card-bg);
+      }
+
+      /* Dashboard Section */
+      .dashboard-section {
+        display: none;
+        padding: 48px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .dashboard-section.visible { display: block; }
+
+      .dashboard-header {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+
+      .dashboard-header h2 {
+        font-family: var(--serif);
+        font-size: 32px;
+        font-weight: 400;
+        margin: 0 0 8px;
+      }
+
+      .dashboard-header .sub {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      .dashboard-iframe {
+        width: 100%;
+        height: 700px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--card-bg);
+      }
+
+      /* Footer */
+      footer {
+        text-align: center;
+        padding: 32px;
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        nav { padding: 16px 24px; }
+        .hero {
+          grid-template-columns: 1fr;
+          padding: 40px 24px;
+          gap: 48px;
+        }
+        .hero-visual { order: -1; }
+        .scanner-section { padding: 60px 24px; }
+        .dashboard-section { padding: 32px 16px; }
+      }
     </style>
   </head>
   <body>
-    <header>
-      <h1>MCP Apps Playground</h1>
-      <p>
-        A tiny local sandbox to demo the <strong>MCP Apps</strong> pattern: host (parent page)  UI (sandboxed iframe) + postMessage.
-      </p>
-    </header>
+    <div class="flash-overlay" id="flashOverlay"></div>
 
-    <main>
-      <section class="panel">
-        <h2>1) Tool data (host  UI)</h2>
-        <textarea id="payload" spellcheck="false"></textarea>
-        <div class="controls">
-          <button id="send">Send to UI</button>
-          <button id="reset">Reset sample</button>
-          <span class="small">Tip: edit JSON, then send.</span>
+    <nav>
+      <div class="wordmark">SpendSnap.</div>
+      <div class="nav-right">
+        <a href="#" class="nav-link">Login</a>
+        <button class="btn btn-outline" id="getAppBtn">Get App</button>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="eyebrow">Automated Finance</div>
+        <h1>Stop guessing where your money went.</h1>
+        <p class="hero-sub">
+          The first receipt scanner that actually feels like magic. Turn paper clutter into a beautiful, real-time spending dashboard in seconds.
+        </p>
+        <button class="btn btn-primary" id="startScanBtn">Start Scanning Free</button>
+      </div>
+      <div class="hero-visual">
+        <div class="receipt-card">
+          <div class="receipt-dot"></div>
+          <div class="receipt-title">Cafe Latte</div>
+          <div class="receipt-line"></div>
+          <div class="receipt-line medium"></div>
+          <div class="receipt-line short"></div>
+          <div class="receipt-line"></div>
+          <div class="receipt-line medium"></div>
+          <div class="receipt-line total"></div>
+          <div class="receipt-edge"></div>
         </div>
-      </section>
+        <div class="chevron"></div>
+      </div>
+    </section>
 
-      <section class="panel">
-        <h2>2) UI iframe (stand-in for an MCP App)</h2>
-        <iframe id="app" src="/app" sandbox="allow-scripts"></iframe>
-        <pre id="log"></pre>
-      </section>
-    </main>
+    <section class="scanner-section" id="scannerSection">
+      <div class="scanner-wrap">
+        <h2>Upload a receipt. Get a dashboard.</h2>
+        <p class="sub">Snap a photo or upload an image. We'll handle the rest.</p>
+
+        <div class="scan-box" id="scanBox">
+          <div class="scanline" id="scanline"></div>
+
+          <img id="scanPreview" class="scan-preview" alt="Receipt preview" />
+
+          <div class="scan-actions" id="scanActions">
+            <button class="btn btn-primary" id="scanBtn">Scan Receipt</button>
+            <span class="upload-link" id="uploadLink">or upload from gallery</span>
+            <input type="file" id="fileInput" class="file-input" accept="image/*" capture="environment" />
+          </div>
+
+          <div class="scan-status" id="scanStatus">
+            <div class="spinner"></div>
+            <div class="scan-status-text" id="statusText">Reading receipt...</div>
+          </div>
+        </div>
+
+        <details class="advanced-toggle">
+          <summary>Advanced: paste receipt text</summary>
+          <div class="advanced-content">
+            <textarea id="receiptText" class="receipt-textarea" spellcheck="false"></textarea>
+            <button class="btn btn-outline" style="margin-top: 12px;" id="analyzeTextBtn">Analyze Text</button>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="dashboard-section" id="dashboardSection">
+      <div class="dashboard-header">
+        <h2>Your Spending Report</h2>
+        <p class="sub" id="dashMerchant"></p>
+      </div>
+      <iframe id="dashboardFrame" class="dashboard-iframe" src="/app" sandbox="allow-scripts"></iframe>
+    </section>
+
+    <footer>
+      Nothing is uploaded. This demo runs entirely in your browser.
+    </footer>
 
     <script>
-      const sample = {
-        tool: "summarize_repo",
-        input: { owner: "modelcontextprotocol", repo: "ext-apps" },
-        output: {
-          summary: "SDK + spec for MCP Apps Extension (SEP-1865) to embed interactive UIs from MCP servers in chat hosts.",
-          links: [
-            "https://github.com/modelcontextprotocol/ext-apps",
-            "https://modelcontextprotocol.github.io/ext-apps/api/"
-          ]
-        },
-        meta: { runId: "demo-" + Math.random().toString(16).slice(2), ts: new Date().toISOString() }
-      };
+      const SAMPLE_RECEIPT = `WHOLE FOODS MARKET
+1695 2nd Ave
+New York, NY
 
-      const payloadEl = document.getElementById("payload");
-      const frame = document.getElementById("app");
-      const logEl = document.getElementById("log");
+Date: 01/30/2026  10:41 AM
 
-      function log(line) {
-        logEl.textContent = (line + "\n" + logEl.textContent).slice(0, 5000);
+Bananas             1.29
+Greek Yogurt        5.99
+Chicken Thighs      12.99
+Avocados (2)        3.58
+Sparkling Water     6.49
+Ice Cream Pint      8.99
+
+Subtotal            39.33
+Tax                 3.12
+Total               42.45
+
+VISA **** 4242
+Thank you!`;
+
+      // Elements
+      const getAppBtn = document.getElementById('getAppBtn');
+      const startScanBtn = document.getElementById('startScanBtn');
+      const scannerSection = document.getElementById('scannerSection');
+      const scanBox = document.getElementById('scanBox');
+      const scanBtn = document.getElementById('scanBtn');
+      const uploadLink = document.getElementById('uploadLink');
+      const fileInput = document.getElementById('fileInput');
+      const scanPreview = document.getElementById('scanPreview');
+      const scanActions = document.getElementById('scanActions');
+      const scanStatus = document.getElementById('scanStatus');
+      const statusText = document.getElementById('statusText');
+      const flashOverlay = document.getElementById('flashOverlay');
+      const receiptText = document.getElementById('receiptText');
+      const analyzeTextBtn = document.getElementById('analyzeTextBtn');
+      const dashboardSection = document.getElementById('dashboardSection');
+      const dashboardFrame = document.getElementById('dashboardFrame');
+      const dashMerchant = document.getElementById('dashMerchant');
+
+      // Init
+      receiptText.value = SAMPLE_RECEIPT;
+
+      // Scroll to scanner
+      function scrollToScanner() {
+        scannerSection.scrollIntoView({ behavior: 'smooth' });
       }
 
-      function setSample() {
-        payloadEl.value = JSON.stringify(sample, null, 2);
+      getAppBtn.addEventListener('click', scrollToScanner);
+      startScanBtn.addEventListener('click', scrollToScanner);
+
+      // Demo scan flow
+      // Primary CTA: for the demo, "Scan Receipt" instantly loads a realistic sample receipt
+      // (so the experience feels natural even without uploading a file).
+      scanBtn.addEventListener('click', () => {
+        showPreviewAndScan('/static/assets/sample-receipt-wholefoods.svg');
+      });
+
+      // Optional path: user can still upload a real image
+      uploadLink.addEventListener('click', () => fileInput.click());
+
+      function showPreviewAndScan(previewSrc) {
+        // Show preview
+        scanPreview.src = previewSrc;
+        scanPreview.classList.add('visible');
+
+        // Trigger flash
+        triggerFlash();
+
+        // Start scan animation
+        setTimeout(() => startScanning(), 400);
       }
 
-      document.getElementById("reset").addEventListener("click", () => {
-        setSample();
-        log("[host] reset sample payload");
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        const url = URL.createObjectURL(file);
+        showPreviewAndScan(url);
       });
 
-      document.getElementById("send").addEventListener("click", () => {
-        let data;
-        try {
-          data = JSON.parse(payloadEl.value);
-        } catch (e) {
-          alert("Invalid JSON: " + e.message);
-          return;
-        }
-        frame.contentWindow.postMessage({ type: "mcp:tool_data", data }, "*");
-        log("[host] -> ui postMessage: mcp:tool_data");
+      function triggerFlash() {
+        flashOverlay.classList.remove('flash');
+        void flashOverlay.offsetWidth; // Reflow
+        flashOverlay.classList.add('flash');
+      }
+
+      function startScanning() {
+        scanBox.classList.add('active', 'scanning');
+        scanActions.style.display = 'none';
+        scanStatus.classList.add('visible');
+        statusText.textContent = 'Reading receipt...';
+
+        // Simulate OCR stages
+        setTimeout(() => {
+          statusText.textContent = 'Extracting items...';
+        }, 800);
+
+        setTimeout(() => {
+          statusText.textContent = 'Categorizing...';
+        }, 1500);
+
+        setTimeout(() => {
+          statusText.textContent = 'Building dashboard...';
+        }, 2200);
+
+        setTimeout(() => {
+          finishScanning();
+        }, 2800);
+      }
+
+      function finishScanning() {
+        scanBox.classList.remove('scanning');
+
+        // Parse and send to dashboard
+        const text = receiptText.value.trim() || SAMPLE_RECEIPT;
+        const parsed = parseReceiptMock(text);
+        sendToDashboard(parsed, text);
+
+        // Show dashboard
+        dashMerchant.textContent = `${parsed.merchant} — ${parsed.date}`;
+        dashboardSection.classList.add('visible');
+
+        // Scroll to dashboard
+        setTimeout(() => {
+          dashboardSection.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
+
+        // Reset scanner UI
+        setTimeout(() => {
+          scanStatus.classList.remove('visible');
+          scanActions.style.display = 'flex';
+          scanBox.classList.remove('active');
+        }, 500);
+      }
+
+      // Analyze text button
+      analyzeTextBtn.addEventListener('click', () => {
+        const text = receiptText.value.trim();
+        if (!text) return alert('Please enter receipt text.');
+
+        triggerFlash();
+        startScanning();
       });
 
+      // Mock parser
+      function parseReceiptMock(text) {
+        const merchant = /WHOLE FOODS/i.test(text) ? "Whole Foods" : "Receipt";
+        const dateMatch = text.match(/Date:\s*([0-9/]+)/i);
+        const date = dateMatch ? dateMatch[1] : "01/30/2026";
+
+        const items = [
+          { name: "Bananas", qty: 1, price: 1.29, category: "Groceries" },
+          { name: "Greek Yogurt", qty: 1, price: 5.99, category: "Groceries" },
+          { name: "Chicken Thighs", qty: 1, price: 12.99, category: "Groceries" },
+          { name: "Avocados", qty: 2, price: 3.58, category: "Groceries" },
+          { name: "Sparkling Water", qty: 1, price: 6.49, category: "Beverages" },
+          { name: "Ice Cream Pint", qty: 1, price: 8.99, category: "Treats" }
+        ];
+
+        const subtotal = items.reduce((s, it) => s + it.price, 0);
+        const tax = 3.12;
+        const total = +(subtotal + tax).toFixed(2);
+
+        const byCat = items.reduce((acc, it) => {
+          acc[it.category] = (acc[it.category] || 0) + it.price;
+          return acc;
+        }, {});
+
+        const topCat = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
+        const topItem = [...items].sort((a, b) => b.price - a.price)[0];
+
+        const insights = [
+          `Largest category: ${topCat[0]} ($${topCat[1].toFixed(2)})`,
+          `Top item: ${topItem.name} ($${topItem.price.toFixed(2)})`,
+          `Quick win: swapping 2 items to store-brand could save ~$${Math.min(8, total * 0.18).toFixed(0)}`
+        ];
+
+        return { merchant, date, total, currency: "USD", tax, items, insights };
+      }
+
+      function sendToDashboard(parsed, text) {
+        const payload = {
+          tool: "receipt.parse",
+          input: { text },
+          output: parsed,
+          meta: { runId: "spendsnap-" + Math.random().toString(16).slice(2), ts: new Date().toISOString() }
+        };
+
+        dashboardFrame.contentWindow.postMessage({ type: "mcp:tool_data", data: payload }, "*");
+      }
+
+      // Listen for dashboard events
       window.addEventListener("message", (event) => {
         if (!event.data || typeof event.data !== "object") return;
-        if (event.data.type === "mcp:ui_event") {
-          log("[ui] -> host: " + JSON.stringify(event.data, null, 0));
-        }
+        // Could handle ui_ready or other events here
       });
-
-      setSample();
-      log("[host] ready");
     </script>
   </body>
 </html>

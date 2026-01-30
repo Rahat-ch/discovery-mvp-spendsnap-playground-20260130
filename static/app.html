@@ -3,56 +3,651 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MCP App UI (Iframe)</title>
+    <title>SpendSnap — Dashboard</title>
     <style>
-      :root { color-scheme: light dark; }
-      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; padding: 12px; }
-      .card { border: 1px solid rgba(127,127,127,0.25); border-radius: 10px; padding: 12px; }
-      h1 { font-size: 14px; margin: 0 0 8px; }
-      p { margin: 6px 0; opacity: 0.85; font-size: 12px; }
-      pre { margin: 10px 0 0; padding: 10px; border-radius: 8px; background: rgba(127,127,127,0.08); overflow: auto; font-size: 12px; }
-      button { margin-top: 10px; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(127,127,127,0.35); background: transparent; cursor: pointer; }
+      *, *::before, *::after { box-sizing: border-box; }
+
+      :root {
+        --bg: #F7F3ED;
+        --text: #1A1A1A;
+        --text-muted: #5C5C5C;
+        --olive: #3D4A3A;
+        --card-bg: #FFFDF9;
+        --border: rgba(60, 74, 58, 0.12);
+        --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+        --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        font-family: var(--sans);
+        margin: 0;
+        padding: 24px;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      /* Empty state */
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 400px;
+        text-align: center;
+        color: var(--text-muted);
+      }
+
+      .empty-icon {
+        width: 64px;
+        height: 64px;
+        border: 2px dashed var(--border);
+        border-radius: 16px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        opacity: 0.5;
+      }
+
+      .empty-state h2 {
+        font-family: var(--serif);
+        font-size: 24px;
+        font-weight: 400;
+        margin: 0 0 8px;
+        color: var(--text);
+      }
+
+      /* Dashboard */
+      .dashboard {
+        display: none;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .dashboard.visible { display: block; }
+
+      /* Header */
+      .dash-header {
+        text-align: center;
+        margin-bottom: 32px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.6s ease;
+      }
+      .dash-header.reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .dash-header h1 {
+        font-family: var(--serif);
+        font-size: 28px;
+        font-weight: 400;
+        margin: 0 0 4px;
+      }
+
+      .dash-header .sub {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      /* KPI Grid */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      @media (max-width: 700px) {
+        .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      }
+
+      .kpi {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+      .kpi.reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .kpi-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      .kpi-value {
+        font-family: var(--serif);
+        font-size: 28px;
+        font-weight: 400;
+        margin-bottom: 4px;
+      }
+
+      .kpi-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      /* Cards Grid */
+      .cards-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 24px;
+      }
+
+      @media (max-width: 700px) {
+        .cards-grid { grid-template-columns: 1fr; }
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+      .card.reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .card-title {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-title .currency {
+        font-weight: 400;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+
+      /* Pie Chart */
+      .pie-wrap {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 24px;
+        align-items: center;
+      }
+
+      @media (max-width: 500px) {
+        .pie-wrap { grid-template-columns: 1fr; justify-items: center; }
+      }
+
+      #pie {
+        transform: rotate(-90deg);
+      }
+
+      .legend {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .legend-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.4s ease;
+      }
+      .legend-row.reveal {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .legend-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .legend-label {
+        font-size: 14px;
+      }
+
+      .legend-value {
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+
+      /* Insights */
+      .insights-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .insights-list li {
+        padding: 16px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 15px;
+        line-height: 1.5;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s ease;
+      }
+      .insights-list li:last-child { border-bottom: none; }
+      .insights-list li.reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Quick-win pulse */
+      .insights-list li.quick-win {
+        background: linear-gradient(90deg, rgba(61, 74, 58, 0.08), transparent);
+        margin: 0 -24px;
+        padding: 16px 24px;
+        border-radius: 0;
+      }
+      .insights-list li.quick-win.pulse {
+        animation: pulseGlow 1.5s ease-in-out 2;
+      }
+
+      @keyframes pulseGlow {
+        0%, 100% { background: linear-gradient(90deg, rgba(61, 74, 58, 0.08), transparent); }
+        50% { background: linear-gradient(90deg, rgba(61, 74, 58, 0.18), rgba(61, 74, 58, 0.05)); }
+      }
+
+      /* Items Table */
+      .items-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+      }
+      .items-card.reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th, td {
+        text-align: left;
+        padding: 14px 12px;
+        border-bottom: 1px solid var(--border);
+        font-size: 14px;
+      }
+
+      th {
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      tbody tr {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      tbody tr.reveal { opacity: 1; }
+
+      tbody tr:last-child td { border-bottom: none; }
+
+      .num { text-align: right; }
+
+      .cat-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        background: rgba(61, 74, 58, 0.08);
+        border-radius: 999px;
+        font-size: 12px;
+      }
+
+      /* Pie animation */
+      .pie-segment {
+        stroke-dasharray: 0 1000;
+        transition: stroke-dasharray 0.8s ease;
+      }
+      .pie-segment.draw {
+        /* Set via JS */
+      }
     </style>
   </head>
   <body>
-    <div class="card">
-      <h1>UI sandbox</h1>
-      <p>
-        This iframe simulates an <strong>MCP App</strong> rendering inline in a host.
-        It receives tool data via <code>postMessage</code> and can send UI events back.
-      </p>
-      <button id="ping">Send UI event to host</button>
-      <pre id="data">(waiting for host...)</pre>
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">$</div>
+      <h2>Waiting for receipt...</h2>
+      <p>Scan or upload a receipt to see your spending dashboard.</p>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+      <div class="dash-header" id="dashHeader">
+        <h1>Spending Report</h1>
+        <p class="sub" id="merchantDate"></p>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi" data-delay="100">
+          <div class="kpi-label">Total</div>
+          <div class="kpi-value" id="kTotal">$0.00</div>
+          <div class="kpi-sub" id="kTax">Incl. tax</div>
+        </div>
+        <div class="kpi" data-delay="200">
+          <div class="kpi-label">Items</div>
+          <div class="kpi-value" id="kItems">0</div>
+          <div class="kpi-sub">Line items</div>
+        </div>
+        <div class="kpi" data-delay="300">
+          <div class="kpi-label">Top Category</div>
+          <div class="kpi-value" id="kTopCat">—</div>
+          <div class="kpi-sub" id="kTopCatAmt">$0.00</div>
+        </div>
+        <div class="kpi" data-delay="400">
+          <div class="kpi-label">Merchant</div>
+          <div class="kpi-value" id="kMerchant">—</div>
+          <div class="kpi-sub" id="kDate">—</div>
+        </div>
+      </div>
+
+      <div class="cards-grid">
+        <div class="card" id="pieCard" data-delay="500">
+          <div class="card-title">
+            Category Breakdown
+            <span class="currency" id="currency">USD</span>
+          </div>
+          <div class="pie-wrap">
+            <svg id="pie" width="140" height="140" viewBox="0 0 140 140">
+              <circle cx="70" cy="70" r="54" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="28" />
+            </svg>
+            <div class="legend" id="legend"></div>
+          </div>
+        </div>
+
+        <div class="card" id="insightsCard" data-delay="700">
+          <div class="card-title">Insights</div>
+          <ul class="insights-list" id="insights"></ul>
+        </div>
+      </div>
+
+      <div class="items-card" id="itemsCard" data-delay="600">
+        <div class="card-title" style="margin-bottom: 12px;">Line Items</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Category</th>
+              <th class="num">Price</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <script>
-      const pre = document.getElementById("data");
-      const btn = document.getElementById("ping");
+      const emptyState = document.getElementById('emptyState');
+      const dashboard = document.getElementById('dashboard');
+      const dashHeader = document.getElementById('dashHeader');
+      const merchantDate = document.getElementById('merchantDate');
 
-      let lastData = null;
+      const kTotal = document.getElementById('kTotal');
+      const kTax = document.getElementById('kTax');
+      const kItems = document.getElementById('kItems');
+      const kTopCat = document.getElementById('kTopCat');
+      const kTopCatAmt = document.getElementById('kTopCatAmt');
+      const kMerchant = document.getElementById('kMerchant');
+      const kDate = document.getElementById('kDate');
+      const currency = document.getElementById('currency');
 
-      function send(type, payload) {
-        window.parent.postMessage({ type: "mcp:ui_event", event: type, payload }, "*");
+      const pie = document.getElementById('pie');
+      const legend = document.getElementById('legend');
+      const insights = document.getElementById('insights');
+      const itemsBody = document.getElementById('itemsBody');
+
+      const COLORS = ['#3D4A3A', '#7C9A6D', '#B8A88A', '#D4A574', '#8B7355', '#6B8E7A'];
+
+      // Count-up animation
+      function animateValue(el, start, end, duration, prefix = '', suffix = '', decimals = 0) {
+        const range = end - start;
+        const startTime = performance.now();
+
+        function update(currentTime) {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+          const current = start + range * eased;
+          el.textContent = prefix + current.toFixed(decimals) + suffix;
+          if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
       }
 
-      window.addEventListener("message", (event) => {
-        if (!event.data || typeof event.data !== "object") return;
-        if (event.data.type === "mcp:tool_data") {
-          lastData = event.data.data;
-          pre.textContent = JSON.stringify(lastData, null, 2);
-          send("received_tool_data", { ok: true, keys: Object.keys(lastData || {}) });
+      // Pie chart with draw animation
+      function renderPie(categoryTotals) {
+        const entries = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+        const total = entries.reduce((s, [, v]) => s + v, 0) || 1;
+
+        // Clear existing
+        pie.innerHTML = '<circle cx="70" cy="70" r="54" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="28" />';
+        legend.innerHTML = '';
+
+        const radius = 54;
+        const circumference = 2 * Math.PI * radius;
+        let offset = 0;
+
+        entries.forEach(([name, amount], idx) => {
+          const frac = amount / total;
+          const segmentLength = frac * circumference;
+          const color = COLORS[idx % COLORS.length];
+
+          // Create segment
+          const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circle.setAttribute('cx', '70');
+          circle.setAttribute('cy', '70');
+          circle.setAttribute('r', String(radius));
+          circle.setAttribute('fill', 'none');
+          circle.setAttribute('stroke', color);
+          circle.setAttribute('stroke-width', '28');
+          circle.setAttribute('stroke-dasharray', `0 ${circumference}`);
+          circle.setAttribute('stroke-dashoffset', String(-offset));
+          circle.classList.add('pie-segment');
+          pie.appendChild(circle);
+
+          // Animate segment after delay
+          setTimeout(() => {
+            circle.style.strokeDasharray = `${segmentLength} ${circumference}`;
+          }, 600 + idx * 150);
+
+          offset += segmentLength;
+
+          // Legend row
+          const row = document.createElement('div');
+          row.className = 'legend-row';
+
+          const left = document.createElement('div');
+          left.className = 'legend-left';
+
+          const dot = document.createElement('div');
+          dot.className = 'legend-dot';
+          dot.style.background = color;
+
+          const label = document.createElement('div');
+          label.className = 'legend-label';
+          label.textContent = name;
+
+          const value = document.createElement('div');
+          value.className = 'legend-value';
+          value.textContent = '$' + amount.toFixed(2);
+
+          left.appendChild(dot);
+          left.appendChild(label);
+          row.appendChild(left);
+          row.appendChild(value);
+          legend.appendChild(row);
+
+          // Reveal legend row
+          setTimeout(() => row.classList.add('reveal'), 800 + idx * 150);
+        });
+      }
+
+      // Reveal elements with staggered animation
+      function revealElements() {
+        // Header first
+        setTimeout(() => dashHeader.classList.add('reveal'), 50);
+
+        // KPIs
+        document.querySelectorAll('.kpi').forEach((el, idx) => {
+          const delay = parseInt(el.dataset.delay) || (100 + idx * 100);
+          setTimeout(() => el.classList.add('reveal'), delay);
+        });
+
+        // Cards
+        document.querySelectorAll('.card, .items-card').forEach((el) => {
+          const delay = parseInt(el.dataset.delay) || 500;
+          setTimeout(() => el.classList.add('reveal'), delay);
+        });
+
+        // Table rows
+        document.querySelectorAll('#itemsBody tr').forEach((tr, idx) => {
+          setTimeout(() => tr.classList.add('reveal'), 700 + idx * 80);
+        });
+
+        // Insights (last)
+        document.querySelectorAll('#insights li').forEach((li, idx) => {
+          setTimeout(() => {
+            li.classList.add('reveal');
+            // Pulse quick-win
+            if (li.classList.contains('quick-win')) {
+              setTimeout(() => li.classList.add('pulse'), 300);
+            }
+          }, 900 + idx * 200);
+        });
+      }
+
+      function render(payload) {
+        if (!payload || !payload.output) return;
+        const out = payload.output;
+        const items = Array.isArray(out.items) ? out.items : [];
+
+        // Compute categories
+        const byCat = items.reduce((acc, it) => {
+          const c = it.category || 'Other';
+          acc[c] = (acc[c] || 0) + (it.price || 0);
+          return acc;
+        }, {});
+
+        const topCat = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0] || ['—', 0];
+
+        // Show dashboard
+        emptyState.style.display = 'none';
+        dashboard.classList.add('visible');
+
+        // Set static values
+        merchantDate.textContent = `${out.merchant || 'Receipt'} — ${out.date || 'Today'}`;
+        kMerchant.textContent = out.merchant || '—';
+        kDate.textContent = out.date ? `Date: ${out.date}` : '—';
+        kTopCat.textContent = topCat[0];
+        currency.textContent = out.currency || 'USD';
+
+        // Animate numbers
+        const totalVal = out.total || 0;
+        const taxVal = out.tax || 0;
+        const itemsCount = items.length;
+        const topCatVal = topCat[1];
+
+        animateValue(kTotal, 0, totalVal, 1200, '$', '', 2);
+        animateValue(kItems, 0, itemsCount, 800, '', '', 0);
+
+        setTimeout(() => {
+          kTax.textContent = `Incl. tax: $${taxVal.toFixed(2)}`;
+          kTopCatAmt.textContent = '$' + topCatVal.toFixed(2);
+        }, 400);
+
+        // Render items table
+        itemsBody.innerHTML = '';
+        items.forEach((it) => {
+          const tr = document.createElement('tr');
+
+          const td1 = document.createElement('td');
+          td1.textContent = it.name || '—';
+
+          const td2 = document.createElement('td');
+          const badge = document.createElement('span');
+          badge.className = 'cat-badge';
+          badge.textContent = it.category || '—';
+          td2.appendChild(badge);
+
+          const td3 = document.createElement('td');
+          td3.className = 'num';
+          td3.textContent = '$' + (it.price || 0).toFixed(2);
+
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+          tr.appendChild(td3);
+          itemsBody.appendChild(tr);
+        });
+
+        // Render insights
+        insights.innerHTML = '';
+        const insightsList = Array.isArray(out.insights) ? out.insights : [];
+        insightsList.forEach((text, idx) => {
+          const li = document.createElement('li');
+          li.textContent = text;
+          if (text.toLowerCase().includes('quick win')) {
+            li.classList.add('quick-win');
+          }
+          insights.appendChild(li);
+        });
+
+        // Render pie
+        renderPie(byCat);
+
+        // Trigger reveal animations
+        revealElements();
+      }
+
+      // Listen for data from parent
+      window.addEventListener('message', (event) => {
+        if (!event.data || typeof event.data !== 'object') return;
+        if (event.data.type === 'mcp:tool_data') {
+          render(event.data.data);
+          window.parent.postMessage({
+            type: 'mcp:ui_event',
+            event: 'received_tool_data',
+            payload: { ok: true }
+          }, '*');
         }
       });
 
-      btn.addEventListener("click", () => {
-        send("button_clicked", {
-          at: new Date().toISOString(),
-          note: "In a real MCP App, this could request another tool call via the host bridge.",
-          lastTool: lastData?.tool || null
-        });
-      });
-
-      send("ui_ready", { ts: new Date().toISOString() });
+      // Announce ready
+      window.parent.postMessage({
+        type: 'mcp:ui_event',
+        event: 'ui_ready',
+        payload: { ts: new Date().toISOString(), ui: 'spendsnap_dashboard' }
+      }, '*');
     </script>
   </body>
 </html>
