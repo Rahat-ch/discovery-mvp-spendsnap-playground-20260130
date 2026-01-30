@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCP Apps Playground</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; }
+      header { padding: 16px 18px; border-bottom: 1px solid rgba(127,127,127,0.25); }
+      header h1 { margin: 0 0 6px; font-size: 18px; }
+      header p { margin: 0; opacity: 0.8; font-size: 13px; }
+      main { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; height: calc(100vh - 82px); box-sizing: border-box; }
+      .panel { border: 1px solid rgba(127,127,127,0.25); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+      .panel h2 { margin: 0; padding: 10px 12px; font-size: 13px; border-bottom: 1px solid rgba(127,127,127,0.25); opacity: 0.9; }
+      textarea { flex: 1; width: 100%; border: 0; outline: none; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; resize: none; }
+      .controls { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(127,127,127,0.25); align-items: center; }
+      button { padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(127,127,127,0.35); background: transparent; cursor: pointer; }
+      button:hover { border-color: rgba(127,127,127,0.7); }
+      .small { font-size: 12px; opacity: 0.8; }
+      iframe { flex: 1; width: 100%; border: 0; background: rgba(127,127,127,0.05); }
+      pre { margin: 0; padding: 10px 12px; font-size: 12px; overflow: auto; max-height: 160px; border-top: 1px solid rgba(127,127,127,0.25); }
+      @media (max-width: 900px) { main { grid-template-columns: 1fr; height: auto; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>MCP Apps Playground</h1>
+      <p>
+        A tiny local sandbox to demo the <strong>MCP Apps</strong> pattern: host (parent page)  UI (sandboxed iframe) + postMessage.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>1) Tool data (host  UI)</h2>
+        <textarea id="payload" spellcheck="false"></textarea>
+        <div class="controls">
+          <button id="send">Send to UI</button>
+          <button id="reset">Reset sample</button>
+          <span class="small">Tip: edit JSON, then send.</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>2) UI iframe (stand-in for an MCP App)</h2>
+        <iframe id="app" src="/app" sandbox="allow-scripts"></iframe>
+        <pre id="log"></pre>
+      </section>
+    </main>
+
+    <script>
+      const sample = {
+        tool: "summarize_repo",
+        input: { owner: "modelcontextprotocol", repo: "ext-apps" },
+        output: {
+          summary: "SDK + spec for MCP Apps Extension (SEP-1865) to embed interactive UIs from MCP servers in chat hosts.",
+          links: [
+            "https://github.com/modelcontextprotocol/ext-apps",
+            "https://modelcontextprotocol.github.io/ext-apps/api/"
+          ]
+        },
+        meta: { runId: "demo-" + Math.random().toString(16).slice(2), ts: new Date().toISOString() }
+      };
+
+      const payloadEl = document.getElementById("payload");
+      const frame = document.getElementById("app");
+      const logEl = document.getElementById("log");
+
+      function log(line) {
+        logEl.textContent = (line + "\n" + logEl.textContent).slice(0, 5000);
+      }
+
+      function setSample() {
+        payloadEl.value = JSON.stringify(sample, null, 2);
+      }
+
+      document.getElementById("reset").addEventListener("click", () => {
+        setSample();
+        log("[host] reset sample payload");
+      });
+
+      document.getElementById("send").addEventListener("click", () => {
+        let data;
+        try {
+          data = JSON.parse(payloadEl.value);
+        } catch (e) {
+          alert("Invalid JSON: " + e.message);
+          return;
+        }
+        frame.contentWindow.postMessage({ type: "mcp:tool_data", data }, "*");
+        log("[host] -> ui postMessage: mcp:tool_data");
+      });
+
+      window.addEventListener("message", (event) => {
+        if (!event.data || typeof event.data !== "object") return;
+        if (event.data.type === "mcp:ui_event") {
+          log("[ui] -> host: " + JSON.stringify(event.data, null, 0));
+        }
+      });
+
+      setSample();
+      log("[host] ready");
+    </script>
+  </body>
+</html>
